@@ -1,4 +1,4 @@
-//DIRECTORY NAMES ARE NOT UNIQUE!!!!!! THATS WHY THIS ISN"T WORKING
+//DIRECTORY NAMES ARE NOT UNIQUE!!!!!! 
 package main
 
 import (
@@ -9,24 +9,20 @@ import (
     "strconv"
 )
 
-//I think I want a map of directory as key and a struct that has two arrays:
-//One for child directories and one for child files
+/*
+Grab the folder name and insert into array
+Grab the size of files for that folder and update array
+If size of files is > 100000 then we remove that item from the array
+If it's less then we move on to the next one
+If we hit a "cd .." then we add the size to Total and then pop off from stack
+    and also add it to the new last folder in array
 
-
-//So what I really need is a map of folder to total filesize 
-//And a map of folder to sub folders
-//Which I kind of already have
-
-type contents struct {
-    dir []string
-    files int
-}
-
+*/
 
 func readData() []string {
     //Open file
-    //readfile,err := os.Open("data")
-    readfile,err := os.Open("test2")
+    readfile,err := os.Open("data")
+    //readfile,err := os.Open("test2")
     if err != nil {
         fmt.Println(err)
     }
@@ -43,79 +39,67 @@ func readData() []string {
     return data
 }
 
+type folder struct {
+    dir string
+    size int
+}
 
-var directories map[string]contents 
-var data = readData() 
+var data = readData()
+var stack []folder
+var total int
 
 func getFolder(s string) string {
     a := strings.Split(s, " ") 
     return a[len(a)-1]
 }
-func getDirectory(s string) string {
-    a := strings.Split(s, " ") 
-    return a[len(a)-1]
-}
-func fileSize(s string) int {
+
+func getSize(s string) int {
     a := strings.Split(s, " ") 
     num, _ := strconv.Atoi(a[0])
     return num 
 }
 
+func addToAll(n int) {
+    for i:=0; i<=len(stack)-1; i++ {
+        stack[i].size += n
+    }
+}
+
+
 
 func main() {
-    
-    directories = make(map[string]contents) //Initialize the map
 
-    for i := 0; i <= len(data)-1; i++ {
-        if data[i] == "$ ls" {
-            f := getFolder(data[i-1])   //Grabs the parent folder
-            //fmt.Println(f)
-            //Need to find child folders and directories and assign them to childs
-            var file int
-            var dir []string
-            j := i+1
-            for string(data[j][0]) != "$" {
-                if string(data[j][0:3]) == "dir" {
-                    dir = append(dir, getDirectory(string(data[j])))
-                    //fmt.Println(dir)
-                } else {
-                    file += fileSize(data[j])
-                    //fmt.Println(file)
-                }
-                if j < len(data)-1 {
-                    j++
-                } else {
-                    break
-                }
-                }
-            childs := contents{dir, file}
-            directories[f] = childs
-            }
+    for i:=0; i<=len(data)-1; i++ {
+        if string(data[i][:4]) == "$ cd" && data[i] != "$ cd .." {
+            record := getFolder(data[i])
+            f := folder{record, 0}
+            stack = append(stack, f)
         }
-    //fmt.Println(directories)
 
-    total := make(map[string]int)
-    for folder, file := range directories {
-        //If file.folders isn't empty then we want to look at that map and grab the totals            
-        t := file.files 
-        if file.dir != nil {
-            for _, d := range file.dir {
-                t += directories[d].files
-            }
+        if string(data[i][:3]) == "dir" {
+            continue
         }
-        total[folder] = t
+
+        if data[i] == "$ cd .." {
+            //Add last size in stack to total and second from last item and then pop
+            total += stack[len(stack)-1].size
+            stack = stack[:len(stack)-1]
+
+        }
+
+        if string(data[i][0]) != "$" && string(data[i][0]) != "d"{
+            size := getSize(data[i])
+            addToAll(size)
+        }
+
+
+    }
+
+    for _, d := range stack {
+        fmt.Println(d)
     }
 
     fmt.Println(total)
 
-    totalSize := 0
-    for _, size := range total {
-        if size <= 100000 {
-            totalSize += size
-        }
-    }
-    fmt.Println(totalSize)
 
 }
-
-
