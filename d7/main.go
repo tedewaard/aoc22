@@ -2,6 +2,7 @@
 package main
 
 import (
+    "sort"
     "os"
     "fmt"
     "bufio"
@@ -22,7 +23,7 @@ If we hit a "cd .." then we add the size to Total and then pop off from stack
 func readData() []string {
     //Open file
     readfile,err := os.Open("data")
-    //readfile,err := os.Open("test2")
+    //readfile,err := os.Open("test")
     if err != nil {
         fmt.Println(err)
     }
@@ -46,6 +47,7 @@ type folder struct {
 
 var data = readData()
 var stack []folder
+var archive []folder
 var total int
 
 func getFolder(s string) string {
@@ -82,7 +84,11 @@ func main() {
 
         if data[i] == "$ cd .." {
             //Add last size in stack to total and second from last item and then pop
-            total += stack[len(stack)-1].size
+            s := stack[len(stack)-1].size
+            if s <= 100000 {
+                total += stack[len(stack)-1].size
+            }
+            archive = append(archive, stack[len(stack)-1])
             stack = stack[:len(stack)-1]
 
         }
@@ -92,14 +98,41 @@ func main() {
             addToAll(size)
         }
 
+        if i == len(data)-1 {
+            n := stack[len(stack)-1].size
+            if n <= 100000 {
+                total += stack[len(stack)-1].size
+                archive = append(archive, stack[len(stack)-1])
+                stack = stack[:len(stack)-1]
+            }
+        }
+
 
     }
 
+
     for _, d := range stack {
+        if d.size <= 100000{
+            total += d.size
+        }
         fmt.Println(d)
     }
 
-    fmt.Println(total)
+    fmt.Println("Solution 1 = ", total)
 
+
+    target := 30000000 - (70000000 - stack[0].size)
+
+    fmt.Println("Target = ", target)
+    options := []int{}
+    for _, v := range archive {
+        if v.size >= target {
+           options = append(options, v.size) 
+        }
+    }
+
+    sort.Ints(options)
+
+    fmt.Println("Solution 2 = ", options[0])
 
 }
