@@ -41,27 +41,57 @@ var visibleTrees int
 
 
 func checkLeftRight(i int, row []int) bool {
-    var vis bool
+    var upper bool
     for j:=0; j<i; j++  {
         if row[j] >= row[i] {
-            vis = false 
+            upper = false 
+            break
         }else {
-            vis = true
+            upper = true
         }
     }
+
+    var lower bool
     for j:=len(row)-1; j > i; j-- {
         if row[j] >= row[i] {
-            vis = false
+            lower = false
+            break
         } else {
-            vis = true
+            lower = true
         }
     }
-    return vis
+    if upper || lower {
+        return true
+    }else{
+        return false
+    }
 }
 
-func checkUpDown(col int, row int) bool {
-    var vis bool
-    return vis
+func checkUpDown(row int, col int) bool {
+    var left bool
+    for i:=0; i<row; i++ {
+        if data[i][col] >= data[row][col] {
+            left = false
+            break
+        } else {
+            left = true
+        }
+    }
+
+    var right bool
+    for i:=len(data)-1; i>row; i-- {
+        if data[i][col] >= data[row][col] {
+            right = false
+            break
+        } else {
+            right = true
+        }
+    }
+    if left || right {
+        return true
+    } else {
+        return false
+    }
 }
 
 
@@ -71,12 +101,23 @@ func main() {
     visibleTrees += len(data[0])*2
     visibleTrees += (len(data)-2)*2
 
+    for row := 1; row <= len(data)-2; row++ {
+        for col := 1; col <= len(data[row])-2; col++ {
+            fmt.Println(checkLeftRight(col, data[row]), checkUpDown(row, col))
+            if checkLeftRight(col, data[row]) == true || checkUpDown(row, col) == true {
+                visibleTrees++
+            }
+        }
+    }
 
 
+
+//Debugging
     for _, v := range data {
         fmt.Println(v)
     }
 
     fmt.Println("Total visible Trees = ", visibleTrees)
-    fmt.Println(checkLeftRight(2, data[2]))
+    //fmt.Println(checkLeftRight(2, data[3]))
+    //fmt.Println(checkUpDown(1, 3))
 }
