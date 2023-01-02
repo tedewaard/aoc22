@@ -20,8 +20,8 @@ var data []motion
 
 func readData() {
     //Open file
-    readfile,err := os.Open("data")
-    //readfile,err := os.Open("test")
+    //readfile,err := os.Open("data")
+    readfile,err := os.Open("test2")
     if err != nil {
         fmt.Println(err)
     }
@@ -74,7 +74,30 @@ func checkTouching(head position, tail position) bool {
     return false
 }
 
-func movePosition(point position, direction string ) position {
+func checkDiagnal(knot1 position, knot2 position) bool {
+    if knot1.x != knot2.x && knot1.y != knot2.y {
+        //Start with up and right
+        if knot1.x - knot2.x == 1 && knot1.y - knot2.y == 2 {
+            return true
+        }
+        //Up and left
+        if knot1.x - knot2.x == -1 && knot1.y - knot2.y == 2 {
+            return true
+        }
+        //Down and right
+        if knot1.x - knot2.x == 1 && knot1.y - knot2.y == -2 {
+            return true
+        }
+        //Down and left
+        if knot1.x - knot2.x == -1 && knot1.y - knot2.y == -2 {
+            return true
+        }
+    }
+    return false
+}
+
+
+func moveHead(point position, direction string ) position {
     
         switch direction {
         case "U": 
@@ -90,35 +113,131 @@ func movePosition(point position, direction string ) position {
         return point
 }
 
+func moveDiagnal(knot1 position, knot2 position) position {
+    // Diagnal
+    if knot1.x != knot2.x && knot1.y != knot2.y {
+        //Start with up and right
+        if knot1.x - knot2.x == 1 && knot1.y - knot2.y == 2 {
+            knot2.x++
+            knot2.y++
+        }
+        //Up and left
+        if knot1.x - knot2.x == -1 && knot1.y - knot2.y == 2 {
+            knot2.x--
+            knot2.y++
+        }
+        //Down and right
+        if knot1.x - knot2.x == 1 && knot1.y - knot2.y == -2 {
+            knot2.x++
+            knot2.y--
+        }
+        //Down and left
+        if knot1.x - knot2.x == -1 && knot1.y - knot2.y == -2 {
+            knot2.x--
+            knot2.y--
+        }
+    }
+
+
+    return knot2
+
+}
+
+func moveKnots(knot1 position, knot2 position) position {
+    /*
+    //Same axes (y)
+    if knot1.y == knot2.y {
+        if knot1.x - knot2.x > 1 {
+            knot2.x++
+        } else if knot1.x - knot2.x < -1 {
+            knot2.x--
+        }
+    } 
+    
+    //same axes (x)
+    if knot1.x == knot2.x {
+        if knot1.y - knot2.y > 1 {
+            knot2.y++
+        } else if knot1.y - knot2.y < -1 {
+            knot2.y--
+        }
+    }
+    */
+
+    // Diagnal
+    if knot1.x != knot2.x && knot1.y != knot2.y {
+        //Start with up and right
+        if knot1.x - knot2.x == 1 && knot1.y - knot2.y == 2 {
+            knot2.x++
+            knot2.y++
+        }
+        //Up and left
+        if knot1.x - knot2.x == -1 && knot1.y - knot2.y == 2 {
+            knot2.x--
+            knot2.y++
+        }
+        //Down and right
+        if knot1.x - knot2.x == 1 && knot1.y - knot2.y == -2 {
+            knot2.x++
+            knot2.y--
+        }
+        //Down and left
+        if knot1.x - knot2.x == -1 && knot1.y - knot2.y == -2 {
+            knot2.x--
+            knot2.y--
+        }
+    }
+
+
+    return knot2
+}
+
 
 
 func main() {
+    knots := []position{
+        {0, 0},
+        {0, 0},
+        {0, 0},
+        {0, 0},
+        {0, 0},
+        {0, 0},
+        {0, 0},
+        {0, 0},
+        {0, 0},
+    }
     readData()
-    positions := make(map[position]int)
+    tailPositions := make(map[position]int)
+    //I want to move the head and then tell the next one to check if it's 
+    //touching and if not then also move. Then the next should do the same.
 
-    head := position{0, 0}
-    tail := position{0, 0}
 
     for _, i := range data {
-        j := 1
-        for j<=i.steps {
-            oldHead := head
-            head = movePosition(head, i.dir)
-            if checkTouching(head, tail) {
-                //fmt.Println(head, " is touching ", tail)
-            } else {
-                //fmt.Println(head, " is not touching ", tail)
-                positions[tail] = 1                //fmt.Println(tail, " is now moving to ", oldHead)
-                tail = oldHead 
+        j:=1
+        for j <= i.steps {
+            //Move the head
+            knots[0] = moveHead(knots[0], i.dir) 
+            //Now loop through rest of knots
+            for k:=1; k<=len(knots)-1; k++ {
+                //Check if they are touching, if they aren't then check if diangal
+                //and move move accordingly
+                if checkTouching(knots[k-1], knots[k]) == false {
+                    if checkDiagnal(knots[k-1], knots[k]) {
+                        knots[k] = moveDiagnal(knots[k-1], knots[k]) 
+                    } else {
+                        knots[k] = moveHead(knots[k], i.dir)
+                    }
+                }
             }
-            //fmt.Println(oldHead, " is now at ", head)
             j++
         }
-    }
-    positions[tail] = 1  
+        tailPositions[knots[8]] = 1
+    fmt.Println(knots)
+}
 
 
-    fmt.Println(data)
-    fmt.Println(positions)
-    fmt.Println(len(positions))
+
+    fmt.Println(tailPositions)
+    fmt.Println(knots)
+    fmt.Println(len(tailPositions))
 }
