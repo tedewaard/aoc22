@@ -48,22 +48,6 @@ func main() {
 
     readfile.Close()
 
-
-
-    //Index starts at 1 and jumps 4
-    //1, 5, 9, 13
-    //This will grab the number of stacks
-    /*
-    n := len(cargo)-1
-    numStacks := []int{} 
-    for i := 1; i <= len(cargo[n]); i+=4 {
-        if string(cargo[n][i]) != "" {
-            val, _ := strconv.Atoi(string(cargo[n][i]))
-            numStacks = append(numStacks, val)
-        }
-    }
-    */
-
     n := len(cargo)-1
 
     //Make map
@@ -76,7 +60,7 @@ func main() {
             }
         }
     }
-///*
+
     moveCrates := func(count int, from int, to int) {
         /*
         for i := 1; i<=count; i++ {
@@ -121,12 +105,4 @@ func main() {
         }
     }
 
-    /*
-    for _,i := range cargo {
-        fmt.Println(i)
-    }
-    for _,i := range moves {
-        fmt.Println(i)
-    }
-    */
 }

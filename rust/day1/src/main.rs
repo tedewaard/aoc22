@@ -1,7 +1,6 @@
-
 fn main() {
     let input = std::fs::read_to_string("input").expect("Should have been able to read the file");
-//    println!("{}", input);
+    //    println!("{}", input);
 
     let mut sum = 0;
     let mut totals = Vec::new();
